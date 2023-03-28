@@ -2,9 +2,6 @@
 <html>
 <head>
 <style>
-canvas{
-    border: 1px solid blue;
-}
 body{
     overflow: hidden;
     text-align: center;
@@ -65,8 +62,8 @@ function mainLoop(){
         gridPixels = 120*Math.floor(window.innerHeight*0.9/120);
     }
     c.width = gridPixels+2;
-    c.height = window.innerHeight;
-    
+    c.height = window.innerHeight-gridPixels/75;
+    c.style.margin = gridPixels/75 + 'px';
     ctx.clearRect(0,0,c.width,c.height);
     for (var i = 0; i<gridSize; i++){
         for (var j=0; j<gridSize; j++){
@@ -129,15 +126,17 @@ function mainLoop(){
     };
     ctx.fillStyle = 'hsl(104, 96%, 48%)';
     ctx.beginPath();
-    ctx.arc(apple.x*gridPixels/gridSize+gridPixels/(2*gridSize)+1, apple.y*gridPixels/gridSize+gridPixels/(2*gridSize), gridPixels/(2*gridSize), 0, 2*Math.PI);
+    ctx.arc(apple.x*gridPixels/gridSize+gridPixels/(2*gridSize)+1, apple.y*gridPixels/gridSize+gridPixels/(2*gridSize)+1, gridPixels/(2*gridSize), 0, 2*Math.PI);
     ctx.fill();
     ctx.fillStyle = 'black'
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     var space = c.height-c.width;
     ctx.font = space/2 + 'px Sans-serif'
-    ctx.fillText('Score: '+score, gridPixels/2, (c.width+c.height)/2)
-    ctx.strokeRect(0,0,c.width, c.width)
+    ctx.fillText('Score: '+score, gridPixels/2, (c.width+c.height)/2);
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(0.5,0.5,c.width-1, c.width-1)
     if (gameState === 'playing' || gameState === 'start'){
         var timeoutID = setTimeout(mainLoop, animationTime);
     }
