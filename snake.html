@@ -2,14 +2,8 @@
 <html>
 <head>
 <style>
-p{
-    font-family: sans-serif;
-    font-size: 45px;
-    font-weight: bold;
-    margin: 25px;
-}
 canvas{
-    border: 1px solid black;
+    border: 1px solid blue;
 }
 body{
     overflow: hidden;
@@ -18,8 +12,7 @@ body{
 </style>
 </head>
 <body>
-    <canvas id = "myCanvas" width="600" height="600"></canvas>
-    <p id = "score">Score:</p>
+    <canvas id = "myCanvas" width="602" height="700"></canvas>
 <script src="https://code.jquery.com/jquery-2.1.0.js"></script>
 <script>
 var keyCodes = {
@@ -37,18 +30,7 @@ var keysPressed = {
     r: false
 };
 var gridSize = 15;
-if (window.innerHeight < 150){
-    var gridPixels = 120
-} else if (window.innerHeight< 270) {
-    var gridPixels = 240
-} else if (window.innerHeight< 390) {
-    var gridPixels = 360
-} else if (window.innerHeight< 510) {
-    var gridPixels = 480
-} else if (window.innerHeight< 750) {
-    var gridPixels = 600
-}
-var scaleFactor = gridPixels/600;
+var gridPixels = 600;
 var gameState = 'start';
 var score = 0;
 var c = document.getElementById("myCanvas");
@@ -77,16 +59,20 @@ function checkDeath(lst){
     return false
 }
 function mainLoop(){
-    gridPixels = 120*Math.floor(window.innerHeight/120)
-    scaleFactor = gridPixels/600;
-    c.width = 600*scaleFactor;
-    c.height = 600*scaleFactor;
+    if (120*Math.floor(window.innerHeight*0.9/120) === 0){
+        gridPixels = 120;
+    }else{
+        gridPixels = 120*Math.floor(window.innerHeight*0.9/120);
+    }
+    c.width = gridPixels+2;
+    c.height = window.innerHeight;
+    
     ctx.clearRect(0,0,c.width,c.height);
     for (var i = 0; i<gridSize; i++){
         for (var j=0; j<gridSize; j++){
             if ((j+i)%2===1){
                 ctx.fillStyle = 'hsl('+((i+j)*5+100)+', 20%, 85%)';
-                ctx.fillRect(i*600*scaleFactor/gridSize, j*600*scaleFactor/gridSize, 600*scaleFactor/gridSize, 600*scaleFactor/gridSize);
+                ctx.fillRect((i*gridPixels/gridSize+1), (j*gridPixels/gridSize +1), gridPixels/gridSize, gridPixels/gridSize);
             };
         };
     };
@@ -139,14 +125,20 @@ function mainLoop(){
     };
     for (var i=0; i<snake.segments.length; i++){
         ctx.fillStyle = 'hsl('+(30*(snake.segments.length-i-1)/(snake.segments.length-1))+', 100%, 50%)';
-        ctx.fillRect(snake.segments[snake.segments.length-i-1].x*600*scaleFactor/gridSize, snake.segments[snake.segments.length-i-1].y*600*scaleFactor/gridSize, 600*scaleFactor/gridSize,600*scaleFactor/gridSize);
+        ctx.fillRect(snake.segments[snake.segments.length-i-1].x*gridPixels/gridSize+1, snake.segments[snake.segments.length-i-1].y*gridPixels/gridSize+1, gridPixels/gridSize,gridPixels/gridSize);
     };
     ctx.fillStyle = 'hsl(104, 96%, 48%)';
     ctx.beginPath();
-    ctx.arc((apple.x*600/gridSize+300/gridSize)*scaleFactor, (apple.y*600/gridSize+300/gridSize)*scaleFactor, (300/gridSize)*scaleFactor, 0, 2*Math.PI);
+    ctx.arc(apple.x*gridPixels/gridSize+gridPixels/(2*gridSize)+1, apple.y*gridPixels/gridSize+gridPixels/(2*gridSize), gridPixels/(2*gridSize), 0, 2*Math.PI);
     ctx.fill();
+    ctx.fillStyle = 'black'
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    var space = c.height-c.width;
+    ctx.font = space/2 + 'px Sans-serif'
+    ctx.fillText('Score: '+score, gridPixels/2, (c.width+c.height)/2)
+    ctx.strokeRect(0,0,c.width, c.width)
     if (gameState === 'playing' || gameState === 'start'){
-        $('#score').text('Score: '+ score)
         var timeoutID = setTimeout(mainLoop, animationTime);
     }
 }
