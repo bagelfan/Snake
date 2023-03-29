@@ -112,6 +112,10 @@ function moveSnake(){
         if (animationTime>50){
             animationTime-=1;
         };
+        if (snake.len === gridSize**2){
+            gameState = 'end'
+            return null
+        }
         var touching = true;
         while (touching){
             touching = false;
