@@ -13,6 +13,7 @@ body{
 <script src="https://code.jquery.com/jquery-2.1.0.js"></script>
 <script>
 var keyCodes = {
+    32: 'space',
     37: 'left',
     38: 'up',
     39: 'right',
@@ -24,6 +25,7 @@ var keyCodes = {
     82: 'r'
 };
 var keysPressed = {
+    space: false,
     left: false,
     up: false,
     right: false,
@@ -164,7 +166,9 @@ function mainLoop(){
     
     drawBoard();
     if (gameState === 'choosing'){
-        
+        ctx.fillStyle = 'hsla(0, 100%, 100%, 0.8)'
+        ctx.fillRect(0,0,c.width,c.height);
+
     }
     var timeoutID = setTimeout(mainLoop, animationTime);
     
@@ -195,21 +199,21 @@ $("body").keydown(function (event) {
     if (gameState === 'choosing'){
         if (keysPressed.one){
             gridSize = 8;
-            gameState = 'start'
             setUp();
         } else if (keysPressed.two){
             gridSize = 10;
-            gameState = 'start'
             setUp();
         } else if (keysPressed.three){
             gridSize = 15;
-            gameState = 'start'
             setUp();
         } else if (keysPressed.four){
             gridSize = 20;
+            setUp();
+        };
+        if (keysPressed.space){
             gameState = 'start'
             setUp();
-        } 
+        }
     }
     if (gameState === 'end' && keysPressed.r){
         gameState = 'choosing'
