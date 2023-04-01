@@ -5,7 +5,7 @@
 body{
     overflow: hidden;
     text-align: center;
-} 
+}
 </style>
 </head>
 <body>
@@ -22,6 +22,7 @@ var keyCodes = {
     50: 'two',
     51: 'three',
     52: 'four',
+    53: 'five',
     82: 'r'
 };
 var keysPressed = {
@@ -36,6 +37,7 @@ var keysPressed = {
     four: false,
     r: false
 };
+var sizes = [8,10,15,20];
 var gridSize = 8;
 var gridPixels = 600;
 var gameState = 'choosing';
@@ -91,6 +93,35 @@ function drawBoard(){
         ctx.fillRect(snake.segments[snake.segments.length-i-1].x*gridPixels/gridSize+1, snake.segments[snake.segments.length-i-1].y*gridPixels/gridSize+1, gridPixels/gridSize,gridPixels/gridSize);
     };
 };
+function drawMenu(){
+    ctx.fillStyle = 'hsla(0, 100%, 100%, 0.9)'
+    ctx.fillRect(0,0,c.width,c.width);
+    ctx.fillStyle = 'black';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = 15*gridPixels/120+'px sans-serif';
+    ctx.fillText('SNAKE', c.width/2, 14*gridPixels/120);
+    ctx.font = 10*gridPixels/120+'px sans-serif';
+    ctx.fillText('Chose the grid size', c.width/2, 30*gridPixels/120);
+    ctx.font = 7*gridPixels/120+'px sans-serif';
+    for (var i = 0; i<4; i++){
+        var textWidth = 114.8;
+        ctx.fillText(sizes[i]+' x ' + sizes[i], (18+28*i)*gridPixels/120, 46*gridPixels/120);
+        ctx.fillText(i+1, (90+140*i)*gridPixels/600,290*gridPixels/600)
+        ctx.lineWidth = 3;
+        if(sizes.indexOf(gridSize) === i){
+            ctx.strokeStyle = 'green'
+        } else {
+            ctx.strokeStyle = 'black';
+        }
+        ctx.strokeRect((80+140*i-textWidth/2)*gridPixels/600, 202.5*gridPixels/600, (textWidth+20)*gridPixels/600, 55*gridPixels/600);
+
+    }
+    ctx.font = 10*gridPixels/120+'px sans-serif';
+    ctx.fillText('Or', c.width/2, 70*gridPixels/120);
+    ctx.font = 60*gridPixels/600+'px sans-serif';
+    ctx.fillText('Press space to begin', c.width/2, 550*gridPixels/600);
+}
 function moveSnake(){
     snake.currentDirection = snake.newDirection;
     snake.newSegments = [];
@@ -167,34 +198,40 @@ function mainLoop(){
     if (gameState === 'playing'){
         moveSnake();
     }
-    
     drawBoard();
     if (gameState === 'choosing'){
-        ctx.fillStyle = 'hsla(0, 100%, 100%, 0.8)'
-        ctx.fillRect(0,0,c.width,c.height);
-
+        drawMenu();
+    }
+    if (gameState === 'instructions'){
+        ctx.fillStyle = 'hsla(0, 100%, 100%, 0.9)'
+        ctx.fillRect(0,0,c.width,c.width);
+        ctx.fillStyle = 'black';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = 15*gridPixels/120+'px sans-serif';
+        ctx.fillText('Instructions', c.width/2, 14*gridPixels/120);
     }
     var timeoutID = setTimeout(mainLoop, animationTime);
     
 }
 $("body").keydown(function (event) {
     keysPressed[keyCodes[event.keyCode]] = true;
-    if (keysPressed.left && snake.currentDirection != 'right' && gameState != 'end' && gameState != 'choosing'){
+    if (keysPressed.left && snake.currentDirection != 'right' && (gameState === 'playing' || gameState === 'start')){
         snake.newDirection = 'left';
         if (gameState != 'playing'){
             gameState = 'playing'
         }
-    } else if (keysPressed.up && snake.currentDirection != 'down' && gameState != 'end' && gameState != 'choosing'){
+    } else if (keysPressed.up && snake.currentDirection != 'down' && (gameState === 'playing' || gameState === 'start')){
         snake.newDirection = 'up';
         if (gameState != 'playing'){
             gameState = 'playing'
         }
-    } else if (keysPressed.right && snake.currentDirection != 'left' && gameState != 'end' && gameState != 'choosing'){
+    } else if (keysPressed.right && snake.currentDirection != 'left' && (gameState === 'playing' || gameState === 'start')){
         snake.newDirection = 'right';
         if (gameState != 'playing'){
             gameState = 'playing'
         }
-    } else if (keysPressed.down && snake.currentDirection != 'up' && gameState != 'end' && gameState != 'choosing'){
+    } else if (keysPressed.down && snake.currentDirection != 'up' && (gameState === 'playing' || gameState === 'start')){
         snake.newDirection = 'down';
         if (gameState != 'playing'){
             gameState = 'playing'
@@ -202,24 +239,28 @@ $("body").keydown(function (event) {
     };
     if (gameState === 'choosing'){
         if (keysPressed.one){
-            gridSize = 8;
+            gridSize = sizes[0];
             setUp();
         } else if (keysPressed.two){
-            gridSize = 10;
+            gridSize = sizes[1];
             setUp();
         } else if (keysPressed.three){
-            gridSize = 15;
+            gridSize = sizes[2];
             setUp();
         } else if (keysPressed.four){
-            gridSize = 20;
+            gridSize = sizes[3];
             setUp();
         };
         if (keysPressed.space){
-            gameState = 'start'
-            setUp();
+            gameState = 'instructions'
         }
     }
-    if (gameState === 'end' && keysPressed.r){
+    if (gameState === 'instructions'){
+        if (keysPressed.r){
+            gameState = 'start'
+        }
+    }
+    if (gameState === 'end' && keysPressed.space){
         gameState = 'choosing'
         setUp();
     };
