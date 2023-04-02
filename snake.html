@@ -23,6 +23,7 @@ var keyCodes = {
     51: 'three',
     52: 'four',
     53: 'five',
+    77: 'm',
     82: 'r'
 };
 var keysPressed = {
@@ -35,11 +36,13 @@ var keysPressed = {
     two: false,
     three: false,
     four: false,
+    m: false,
     r: false
 };
-var sizes = [8,10,15,20];
-var gridSize = 8;
+var gameModes = [5,8,10,16,20];
+var gridSize = 10;
 var gridPixels = 600;
+var scaleFactor = gridPixels/600;
 var gameState = 'choosing';
 var score = 0;
 var c = document.getElementById("myCanvas");
@@ -54,16 +57,36 @@ var snake = {
 };
 var apple = {x:Math.ceil(gridSize*3/4),y:Math.floor(gridSize/2)};
 function setUp(){
-    snake = {
-        len: 4,
-        segments: [{x:4,y:Math.floor(gridSize/2)}, {x:3,y:Math.floor(gridSize/2)},{x:2,y:Math.floor(gridSize/2)}, {x:1,y:Math.floor(gridSize/2)}],
-        newSegments: [{x:4,y:Math.floor(gridSize/2)}, {x:3,y:Math.floor(gridSize/2)},{x:2,y:Math.floor(gridSize/2)}, {x:1,y:Math.floor(gridSize/2)}],
-        currentDirection: 'right',
-        newDirection: null
+    if (gridSize === 5){
+        snake = {
+            len: 4,
+            segments: [{x:3,y:Math.floor(gridSize/2)}, {x:2,y:Math.floor(gridSize/2)},{x:1,y:Math.floor(gridSize/2)}, {x:0,y:Math.floor(gridSize/2)}],
+            newSegments: [{x:3,y:Math.floor(gridSize/2)}, {x:2,y:Math.floor(gridSize/2)},{x:1,y:Math.floor(gridSize/2)}, {x:0,y:Math.floor(gridSize/2)}],
+            currentDirection: 'right',
+            newDirection: null
+        };
+    } else {
+        snake = {
+            len: 4,
+            segments: [{x:4,y:Math.floor(gridSize/2)}, {x:3,y:Math.floor(gridSize/2)},{x:2,y:Math.floor(gridSize/2)}, {x:1,y:Math.floor(gridSize/2)}],
+            newSegments: [{x:4,y:Math.floor(gridSize/2)}, {x:3,y:Math.floor(gridSize/2)},{x:2,y:Math.floor(gridSize/2)}, {x:1,y:Math.floor(gridSize/2)}],
+            currentDirection: 'right',
+            newDirection: null
+        };
     };
     apple = {x:Math.ceil(gridSize*3/4),y:Math.floor(gridSize/2)};
     score = 0;
     animationTime = 150;
+}
+function drawGameOver(){
+    ctx.fillStyle = 'hsla(0, 100%, 100%, 0.9)'
+    ctx.fillRect(0,0,c.width,c.width);
+    ctx.fillStyle = 'black';
+    ctx.font = 100*scaleFactor+'px sans-serif';
+    ctx.fillText('Game Over', c.width/2, 100*scaleFactor);
+    ctx.font = 70*scaleFactor+'px sans-serif';
+    ctx.fillText('Press r to reset', c.width/2, 200*scaleFactor);
+    ctx.fillText('Press m for menu', c.width/2, 300*scaleFactor);
 }
 function drawBoard(){
     ctx.clearRect(0,0,c.width,c.height);
@@ -99,17 +122,17 @@ function drawMenu(){
     ctx.fillStyle = 'black';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = 15*gridPixels/120+'px sans-serif';
-    ctx.fillText('SNAKE', c.width/2, 14*gridPixels/120);
-    ctx.font = 10*gridPixels/120+'px sans-serif';
-    ctx.fillText('Chose the grid size', c.width/2, 30*gridPixels/120);
-    ctx.font = 7*gridPixels/120+'px sans-serif';
+    ctx.font = 75*scaleFactor+'px sans-serif';
+    ctx.fillText('SNAKE', c.width/2, 70*scaleFactor);
+    ctx.font = 50*scaleFactor+'px sans-serif';
+    ctx.fillText('Chose the grid size', c.width/2, 150*scaleFactor);
+    ctx.font = 35*scaleFactor+'px sans-serif';
     for (var i = 0; i<4; i++){
         var textWidth = 114.8;
-        ctx.fillText(sizes[i]+' x ' + sizes[i], (18+28*i)*gridPixels/120, 46*gridPixels/120);
+        ctx.fillText(gameModes[i]+' x ' + gameModes[i], (90+140*i)*scaleFactor, 230*scaleFactor);
         ctx.fillText(i+1, (90+140*i)*gridPixels/600,290*gridPixels/600)
         ctx.lineWidth = 3;
-        if(sizes.indexOf(gridSize) === i){
+        if(gameModes.indexOf(gridSize) === i){
             ctx.strokeStyle = 'green'
         } else {
             ctx.strokeStyle = 'black';
@@ -117,10 +140,18 @@ function drawMenu(){
         ctx.strokeRect((80+140*i-textWidth/2)*gridPixels/600, 202.5*gridPixels/600, (textWidth+20)*gridPixels/600, 55*gridPixels/600);
 
     }
-    ctx.font = 10*gridPixels/120+'px sans-serif';
-    ctx.fillText('Or', c.width/2, 70*gridPixels/120);
-    ctx.font = 60*gridPixels/600+'px sans-serif';
-    ctx.fillText('Press space to begin', c.width/2, 550*gridPixels/600);
+    ctx.fillText('20 x 20', c.width/2, 425*scaleFactor);
+    if(gameModes.indexOf(gridSize) === 4){
+        ctx.strokeStyle = 'green'
+    } else {
+        ctx.strokeStyle = 'black';
+    }
+    ctx.strokeRect((300-textWidth/2-10)*scaleFactor, (425-35/2-10)*scaleFactor, (textWidth+20)*scaleFactor, 55*scaleFactor);
+    ctx.fillText('5', c.width/2, 485*scaleFactor);
+    ctx.font = 50*scaleFactor+'px sans-serif';
+    ctx.fillText('Or', c.width/2, 350*scaleFactor);
+    ctx.font = 60*scaleFactor+'px sans-serif';
+    ctx.fillText('Press space to begin', c.width/2, 550*scaleFactor);
 }
 function moveSnake(){
     snake.currentDirection = snake.newDirection;
@@ -184,11 +215,12 @@ function checkDeath(lst){
     return false
 }
 function mainLoop(){
-    if (120*Math.floor(window.innerHeight*0.9/120) === 0){
-        gridPixels = 120;
+    if (80*Math.floor(window.innerHeight*0.9/80) === 0){
+        gridPixels = 80;
     }else{
-        gridPixels = 120*Math.floor(window.innerHeight*0.9/120);
+        gridPixels = 80*Math.floor(window.innerHeight*0.9/80);
     }
+    scaleFactor = gridPixels/600;
     c.width = gridPixels+2;
     c.height = window.innerHeight-gridPixels/75;
     c.style.margin = gridPixels/75 + 'px';
@@ -202,79 +234,74 @@ function mainLoop(){
     if (gameState === 'choosing'){
         drawMenu();
     }
-    if (gameState === 'instructions'){
-        ctx.fillStyle = 'hsla(0, 100%, 100%, 0.9)'
-        ctx.fillRect(0,0,c.width,c.width);
-        ctx.fillStyle = 'black';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = 15*gridPixels/120+'px sans-serif';
-        ctx.fillText('Instructions', c.width/2, 14*gridPixels/120);
+    if (gameState === 'end'){
+        drawGameOver();
     }
     var timeoutID = setTimeout(mainLoop, animationTime);
     
 }
 $("body").keydown(function (event) {
     keysPressed[keyCodes[event.keyCode]] = true;
-    if (keysPressed.left && snake.currentDirection != 'right' && (gameState === 'playing' || gameState === 'start')){
+    if (keysPressed.left && snake.currentDirection !== 'right' && (gameState === 'playing' || gameState === 'start')){
         snake.newDirection = 'left';
-        if (gameState != 'playing'){
+        if (gameState !== 'playing'){
             gameState = 'playing'
         }
-    } else if (keysPressed.up && snake.currentDirection != 'down' && (gameState === 'playing' || gameState === 'start')){
+    } else if (keysPressed.up && snake.currentDirection !== 'down' && (gameState === 'playing' || gameState === 'start')){
         snake.newDirection = 'up';
-        if (gameState != 'playing'){
+        if (gameState !== 'playing'){
             gameState = 'playing'
         }
-    } else if (keysPressed.right && snake.currentDirection != 'left' && (gameState === 'playing' || gameState === 'start')){
+    } else if (keysPressed.right && snake.currentDirection !== 'left' && (gameState === 'playing' || gameState === 'start')){
         snake.newDirection = 'right';
-        if (gameState != 'playing'){
+        if (gameState !== 'playing'){
             gameState = 'playing'
         }
-    } else if (keysPressed.down && snake.currentDirection != 'up' && (gameState === 'playing' || gameState === 'start')){
+    } else if (keysPressed.down && snake.currentDirection !== 'up' && (gameState === 'playing' || gameState === 'start')){
         snake.newDirection = 'down';
-        if (gameState != 'playing'){
+        if (gameState !== 'playing'){
             gameState = 'playing'
         }
     };
     if (gameState === 'choosing'){
         if (keysPressed.one){
-            gridSize = sizes[0];
+            gridSize = gameModes[0];
             setUp();
         } else if (keysPressed.two){
-            gridSize = sizes[1];
+            gridSize = gameModes[1];
             setUp();
         } else if (keysPressed.three){
-            gridSize = sizes[2];
+            gridSize = gameModes[2];
             setUp();
         } else if (keysPressed.four){
-            gridSize = sizes[3];
+            gridSize = gameModes[3];
+            setUp();
+        } else if (keysPressed.five){
+            gridSize = gameModes[4];
             setUp();
         };
         if (keysPressed.space){
-            gameState = 'instructions'
-        }
-    }
-    if (gameState === 'instructions'){
-        if (keysPressed.r){
             gameState = 'start'
         }
     }
-    if (gameState === 'end' && keysPressed.space){
-        gameState = 'choosing'
+    if (gameState === 'end' && keysPressed.r){
+        gameState = 'start'
         setUp();
-    };
+    } else if (gameState === 'end' && keysPressed.m){
+        gameState = 'choosing';
+        setUp();
+    }
 });
 
 $("body").keyup(function (event) {
     keysPressed[keyCodes[event.keyCode]] = false;
-    if (keysPressed.left && snake.currentDirection != 'right'){
+    if (keysPressed.left && snake.currentDirection !== 'right'){
         snake.newDirection = 'left';
-    } else if (keysPressed.up && snake.currentDirection != 'down'){
+    } else if (keysPressed.up && snake.currentDirection !== 'down'){
         snake.newDirection = 'up';
-    } else if (keysPressed.right && snake.currentDirection != 'left'){
+    } else if (keysPressed.right && snake.currentDirection !== 'left'){
         snake.newDirection = 'right';
-    } else if (keysPressed.down && snake.currentDirection != 'up'){
+    } else if (keysPressed.down && snake.currentDirection !== 'up'){
         snake.newDirection = 'down';
     };
 });
