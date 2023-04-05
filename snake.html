@@ -39,6 +39,13 @@ var keysPressed = {
     m: false,
     r: false
 };
+var highScores = {
+    5: 0,
+    8: 0,
+    10: 0,
+    16: 0,
+    20: 0
+}
 var gameModes = [5,8,10,16,20];
 var gridSize = 10;
 var gridPixels = 600;
@@ -79,14 +86,15 @@ function setUp(){
     animationTime = 150;
 }
 function drawGameOver(){
-    ctx.fillStyle = 'hsla(0, 100%, 100%, 0.9)'
+    ctx.fillStyle = 'hsla(0, 100%, 100%, 0.5)'
     ctx.fillRect(0,0,c.width,c.width);
     ctx.fillStyle = 'black';
-    ctx.font = 100*scaleFactor+'px sans-serif';
-    ctx.fillText('Game Over', c.width/2, 100*scaleFactor);
+    ctx.font = 110*scaleFactor+'px sans-serif';
+    ctx.fillText('Game Over', c.width/2, 150*scaleFactor);
     ctx.font = 70*scaleFactor+'px sans-serif';
-    ctx.fillText('Press r to reset', c.width/2, 200*scaleFactor);
-    ctx.fillText('Press m for menu', c.width/2, 300*scaleFactor);
+    ctx.fillText('Press r to reset', c.width/2, 250*scaleFactor);
+    ctx.fillText('Press m for menu', c.width/2, 350*scaleFactor);
+    ctx.fillText('High Score: ' + highScores[gridSize], c.width/2, 450*scaleFactor)
 }
 function drawBoard(){
     ctx.clearRect(0,0,c.width,c.height);
@@ -117,7 +125,7 @@ function drawBoard(){
     };
 };
 function drawMenu(){
-    ctx.fillStyle = 'hsla(0, 100%, 100%, 0.9)'
+    ctx.fillStyle = 'hsla(0, 100%, 100%, 0.5)'
     ctx.fillRect(0,0,c.width,c.width);
     ctx.fillStyle = 'black';
     ctx.textAlign = 'center';
@@ -202,6 +210,9 @@ function moveSnake(){
 };
 function gameOver(){
     gameState = 'end';
+    if (score > highScores[gridSize]){
+        highScores[gridSize] = score;
+    };
 };
 function checkDeath(lst){
     for (var i=1; i<lst.length; i++){
